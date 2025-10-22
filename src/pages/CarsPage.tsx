@@ -7,6 +7,7 @@ import SearchBar from '../components/SearchBar';
 import SortDropdown from '../components/SortDropdown';
 import ViewToggle from '../components/ViewToggle';
 import LoadingSpinner from '../components/LoadingSpinner';
+import apiService from '../services/api';
 
 interface Car {
   id: string;
@@ -46,141 +47,95 @@ const CarsPage: React.FC = () => {
     features: [] as string[],
     rating: 0
   });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalCars: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
-  // Mock data - in real app, this would come from API
+  // Fetch cars from API
   useEffect(() => {
-    const mockCars: Car[] = [
-      {
-        id: '1',
-        name: 'BMW X5',
-        brand: 'BMW',
-        model: 'X5',
-        year: 2023,
-        category: 'SUV',
-        price: 120,
-        originalPrice: 150,
-        rating: 4.8,
-        reviews: 124,
-        image: '/images/cars/bmw-x5.jpg',
-        features: ['GPS', 'Bluetooth', 'Sunroof', 'Leather Seats'],
-        transmission: 'Automatic',
-        fuel: 'Petrol',
-        seats: 5,
-        mileage: 'Unlimited',
-        isAvailable: true,
-        badge: 'Best Seller',
-        badgeColor: 'bg-neon-green'
-      },
-      {
-        id: '2',
-        name: 'Tesla Model 3',
-        brand: 'Tesla',
-        model: 'Model 3',
-        year: 2023,
-        category: 'Electric',
-        price: 90,
-        originalPrice: 110,
-        rating: 4.9,
-        reviews: 89,
-        image: '/images/cars/tesla-model3.jpg',
-        features: ['Autopilot', 'Supercharger', 'Premium Audio', 'Glass Roof'],
-        transmission: 'Automatic',
-        fuel: 'Electric',
-        seats: 5,
-        mileage: '400 km',
-        isAvailable: true,
-        badge: 'Eco Friendly',
-        badgeColor: 'bg-green-500'
-      },
-      {
-        id: '3',
-        name: 'Mercedes C-Class',
-        brand: 'Mercedes',
-        model: 'C-Class',
-        year: 2023,
-        category: 'Luxury',
-        price: 85,
-        originalPrice: 100,
-        rating: 4.7,
-        reviews: 156,
-        image: '/images/cars/mercedes-c-class.jpg',
-        features: ['Leather', 'Sunroof', 'Premium Audio', 'Navigation'],
-        transmission: 'Automatic',
-        fuel: 'Petrol',
-        seats: 5,
-        mileage: 'Unlimited',
-        isAvailable: false,
-        badge: 'Premium',
-        badgeColor: 'bg-neon-purple'
-      },
-      {
-        id: '4',
-        name: 'Audi A4',
-        brand: 'Audi',
-        model: 'A4',
-        year: 2023,
-        category: 'Sedan',
-        price: 75,
-        originalPrice: 90,
-        rating: 4.6,
-        reviews: 98,
-        image: '/images/cars/audi-a4.jpg',
-        features: ['Quattro', 'Virtual Cockpit', 'Premium Audio', 'LED Lights'],
-        transmission: 'Automatic',
-        fuel: 'Petrol',
-        seats: 5,
-        mileage: 'Unlimited',
-        isAvailable: true,
-        badge: 'Popular',
-        badgeColor: 'bg-neon-blue'
-      },
-      {
-        id: '5',
-        name: 'Honda Civic',
-        brand: 'Honda',
-        model: 'Civic',
-        year: 2023,
-        category: 'Hatchback',
-        price: 45,
-        rating: 4.5,
-        reviews: 203,
-        image: '/images/cars/honda-civic.jpg',
-        features: ['Honda Sensing', 'Apple CarPlay', 'Android Auto', 'Lane Keep Assist'],
-        transmission: 'Automatic',
-        fuel: 'Petrol',
-        seats: 5,
-        mileage: 'Unlimited',
-        isAvailable: true
-      },
-      {
-        id: '6',
-        name: 'Toyota Camry',
-        brand: 'Toyota',
-        model: 'Camry',
-        year: 2023,
-        category: 'Sedan',
-        price: 55,
-        rating: 4.4,
-        reviews: 167,
-        image: '/images/cars/toyota-camry.jpg',
-        features: ['Toyota Safety Sense', 'Wireless Charging', 'JBL Audio', 'Heated Seats'],
-        transmission: 'Automatic',
-        fuel: 'Hybrid',
-        seats: 5,
-        mileage: 'Unlimited',
-        isAvailable: true
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        const response = await apiService.getCars({
+          page: pagination.currentPage,
+          limit: 12,
+          category: filters.category || undefined,
+          minPrice: filters.priceRange[0] || undefined,
+          maxPrice: filters.priceRange[1] || undefined,
+          brand: filters.search || undefined,
+          transmission: filters.transmission || undefined,
+          fuelType: filters.fuel || undefined,
+          seats: filters.seats || undefined,
+          search: filters.search || undefined,
+          sortBy: sortBy === 'recommended' ? 'createdAt' : sortBy,
+          sortOrder: 'desc'
+        });
+        
+        setCars(response.data.cars);
+        setFilteredCars(response.data.cars);
+        setPagination(response.data.pagination);
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+        // Fallback to mock data if API fails
+        const mockCars: Car[] = [
+          {
+            id: '1',
+            name: 'BMW X5',
+            brand: 'BMW',
+            model: 'X5',
+            year: 2023,
+            category: 'SUV',
+            price: 120,
+            originalPrice: 150,
+            rating: 4.8,
+            reviews: 124,
+            image: '/images/cars/bmw-x5.jpg',
+            features: ['GPS', 'Bluetooth', 'Sunroof', 'Leather Seats'],
+            transmission: 'Automatic',
+            fuel: 'Petrol',
+            seats: 5,
+            mileage: 'Unlimited',
+            isAvailable: true,
+            badge: 'Best Seller',
+            badgeColor: 'bg-neon-green'
+          },
+          {
+            id: '2',
+            name: 'Tesla Model 3',
+            brand: 'Tesla',
+            model: 'Model 3',
+            year: 2023,
+            category: 'Electric',
+            price: 90,
+            originalPrice: 110,
+            rating: 4.9,
+            reviews: 89,
+            image: '/images/cars/tesla-model3.jpg',
+            features: ['Autopilot', 'Supercharger', 'Premium Audio', 'Glass Roof'],
+            transmission: 'Automatic',
+            fuel: 'Electric',
+            seats: 5,
+            mileage: '400 km',
+            isAvailable: true,
+            badge: 'Eco Friendly',
+            badgeColor: 'bg-green-500'
+          }
+        ];
+        setCars(mockCars);
+        setFilteredCars(mockCars);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    // Simulate API call
-    setTimeout(() => {
-      setCars(mockCars);
-      setFilteredCars(mockCars);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    fetchCars();
+  }, [filters, sortBy, pagination.currentPage]);
 
-  // Filter and sort cars
+  // Apply filters locally for immediate feedback
   useEffect(() => {
     let filtered = [...cars];
 
@@ -215,7 +170,7 @@ const CarsPage: React.FC = () => {
 
     // Seats filter
     if (filters.seats) {
-      filtered = filtered.filter(car => car.seats >= parseInt(filters.seats));
+      filtered = filtered.filter(car => car.seats === parseInt(filters.seats));
     }
 
     // Rating filter
@@ -223,170 +178,187 @@ const CarsPage: React.FC = () => {
       filtered = filtered.filter(car => car.rating >= filters.rating);
     }
 
-    // Sort
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'popular':
-        filtered.sort((a, b) => b.reviews - a.reviews);
-        break;
-      default:
-        // Recommended (default)
-        break;
+    // Features filter
+    if (filters.features.length > 0) {
+      filtered = filtered.filter(car =>
+        filters.features.every(feature =>
+          car.features.some(carFeature =>
+            carFeature.toLowerCase().includes(feature.toLowerCase())
+          )
+        )
+      );
     }
 
     setFilteredCars(filtered);
-  }, [cars, filters, sortBy]);
+  }, [cars, filters]);
 
-  const handleFilterChange = (newFilters: Partial<typeof filters>) => {
+  // Sort cars
+  useEffect(() => {
+    let sorted = [...filteredCars];
+
+    switch (sortBy) {
+      case 'price-low':
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        sorted.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'year':
+        sorted.sort((a, b) => b.year - a.year);
+        break;
+      case 'name':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        // Keep original order for 'recommended'
+        break;
+    }
+
+    setFilteredCars(sorted);
+  }, [filteredCars, sortBy]);
+
+  const handleFilterChange = (newFilters: any) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    setFilters(prev => ({ ...prev, search: searchTerm }));
+  };
+
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+  };
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-950">
-        <Navigation />
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" />
-        </div>
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-950">
+    <div className="min-h-screen bg-dark-900">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Our <span className="text-gradient">Fleet</span>
-          </h1>
-          <p className="text-gray-300 text-lg">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-4">Our Fleet</h1>
+          <p className="text-gray-400 text-lg">
             Choose from our premium collection of vehicles
           </p>
-        </motion.div>
+        </div>
 
-        {/* Search and Controls */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-8 space-y-4"
-        >
-          <div className="flex flex-col lg:flex-row gap-4">
+        {/* Search and Filters */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <SearchBar
-                value={filters.search}
-                onChange={(value) => handleFilterChange({ search: value })}
-                placeholder="Search cars by name, brand, or model..."
-              />
+              <SearchBar onSearch={handleSearch} />
             </div>
             <div className="flex gap-4">
-              <SortDropdown
-                value={sortBy}
-                onChange={setSortBy}
-              />
-              <ViewToggle
-                mode={viewMode}
-                onChange={setViewMode}
-              />
+              <SortDropdown value={sortBy} onChange={handleSortChange} />
+              <ViewToggle value={viewMode} onChange={handleViewModeChange} />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:w-80"
-          >
+          <div className="lg:w-80">
             <FilterPanel
               filters={filters}
-              onChange={handleFilterChange}
+              onFilterChange={handleFilterChange}
             />
-          </motion.div>
+          </div>
 
-          {/* Cars Grid/List */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex-1"
-          >
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="text-gray-300">
-                Showing {filteredCars.length} of {cars.length} cars
+          {/* Cars Grid */}
+          <div className="flex-1">
+            {filteredCars.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 6.291A7.962 7.962 0 0012 5c-2.34 0-4.29 1.009-5.824 2.709" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No cars found</h3>
+                <p className="text-gray-400">Try adjusting your filters or search terms</p>
               </div>
-              <div className="text-sm text-gray-400">
-                {filters.search && `Results for "${filters.search}"`}
-              </div>
-            </div>
+            ) : (
+              <>
+                {/* Results Header */}
+                <div className="flex justify-between items-center mb-6">
+                  <p className="text-gray-400">
+                    Showing {filteredCars.length} of {pagination.totalCars} cars
+                  </p>
+                </div>
 
-            {/* Cars Display */}
-            {filteredCars.length > 0 ? (
-              <div className={
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
-                  : 'space-y-4'
-              }>
-                {filteredCars.map((car, index) => (
-                  <motion.div
-                    key={car.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
+                {/* Cars Grid */}
+                <div className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                    : 'space-y-6'
+                }>
+                  {filteredCars.map((car) => (
                     <CarCard
+                      key={car.id}
                       car={car}
                       viewMode={viewMode}
                     />
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">🚗</div>
-                <h3 className="text-2xl font-bold text-white mb-4">
-                  No cars found
-                </h3>
-                <p className="text-gray-300 mb-6">
-                  Try adjusting your filters or search terms
-                </p>
-                <button
-                  onClick={() => setFilters({
-                    search: '',
-                    category: '',
-                    priceRange: [0, 500],
-                    transmission: '',
-                    fuel: '',
-                    seats: '',
-                    features: [],
-                    rating: 0
-                  })}
-                  className="px-6 py-3 bg-gradient-neon text-dark-900 font-semibold rounded-lg hover:shadow-neon transition-all duration-300"
-                >
-                  Clear Filters
-                </button>
-              </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-8">
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={!pagination.hasPrevPage}
+                      className="px-4 py-2 bg-dark-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
+                    >
+                      Previous
+                    </button>
+                    
+                    {[...Array(pagination.totalPages)].map((_, index) => {
+                      const page = index + 1;
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-4 py-2 rounded-lg transition-colors ${
+                            page === pagination.currentPage
+                              ? 'bg-gradient-neon text-dark-900'
+                              : 'bg-dark-800 text-white hover:bg-dark-700'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={!pagination.hasNextPage}
+                      className="px-4 py-2 bg-dark-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

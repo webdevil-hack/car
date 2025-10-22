@@ -1,339 +1,312 @@
-# Monstrac CarRent - Premium Car Rental Portal
+# 🚗 Monstrac CarRent - World-Class Car Rental Portal
 
-A world-class car rental portal built with React, TypeScript, and Tailwind CSS featuring a dark theme, 3D animations, and enterprise-grade UI components.
+A comprehensive, full-stack car rental platform built with React, Node.js, and MongoDB. Features a modern dark theme, 3D animations, complete booking system, admin dashboard, and payment integration.
 
-## 🚀 Features
+## ✨ Features
 
-### 🎨 Design & UI
-- **Dark Theme**: Modern dark mode with neon accents and high contrast
-- **3D Animations**: Interactive 3D car models using Three.js/React Three Fiber
-- **Responsive Design**: Mobile-first approach with desktop, tablet, and mobile support
-- **Smooth Animations**: Framer Motion powered micro-interactions and transitions
-- **Glass Morphism**: Backdrop blur effects and translucent elements
+### 🎨 Frontend Features
+- **Modern Dark Theme** with neon accents and gradients
+- **3D Animations** using Framer Motion and Three.js
+- **Responsive Design** for desktop, tablet, and mobile
+- **Interactive Car Gallery** with image zoom and navigation
+- **Advanced Search & Filtering** with real-time results
+- **User Authentication** with JWT tokens
+- **Booking Management** with calendar integration
+- **Payment Processing** with Stripe integration
+- **Admin Dashboard** with analytics and management tools
+- **Customer Dashboard** with booking history and preferences
 
-### 🏠 Homepage Sections
-- **Hero Banner**: 3D car scene with interactive elements
-- **Booking Form**: Advanced search with filters and real-time validation
-- **Categories**: Car type tiles with hover animations
-- **Featured Cars**: Carousel with 3D flip effects and quick booking
-- **How It Works**: 3-step animated process flow
-- **Advantages**: Trust badges and feature highlights
-- **Testimonials**: Customer reviews with rating system
-- **FAQ**: Collapsible questions and answers
-- **CTA Section**: Referral program and promotional offers
-
-### 🚗 Car Management
-- **Car Catalog**: Grid/list view with advanced filtering
-- **Search & Filters**: Real-time search with multiple filter options
-- **Car Details**: 3D viewer, specifications, and booking widget
-- **Availability Calendar**: Real-time availability checking
-- **Pricing Engine**: Dynamic pricing with add-ons and discounts
-
-### 👤 User Management
-- **Authentication**: Login/signup with social login options
-- **Customer Dashboard**: Bookings, wallet, referrals, profile
-- **Admin Dashboard**: Car management, driver management, analytics
-- **Role-based Access**: Customer, Owner, and Admin roles
-
-### 💳 Payment & Booking
-- **Payment Integration**: Stripe, Razorpay, PayPal support
-- **Booking Flow**: Complete reservation process
-- **Notifications**: Email, SMS, and WhatsApp integration
-- **Invoice Generation**: PDF receipts and booking confirmations
+### 🔧 Backend Features
+- **RESTful API** with Express.js and Node.js
+- **MongoDB Database** with Mongoose ODM
+- **JWT Authentication** with role-based access control
+- **Stripe Payment Integration** for secure transactions
+- **Image Upload** with Cloudinary integration
+- **Email Notifications** with Nodemailer
+- **Rate Limiting** and security middleware
+- **Comprehensive Validation** with Express Validator
+- **Analytics & Reporting** for business insights
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **React Three Fiber** - 3D graphics
-- **Three.js** - 3D library
-- **React Router** - Client-side routing
-- **Headless UI** - Accessible components
+- **React 18** with TypeScript
+- **Tailwind CSS** for styling
+- **Framer Motion** for animations
+- **React Router** for navigation
+- **Heroicons** for icons
+- **Three.js** for 3D graphics
+- **Stripe** for payments
 
-### Backend (Planned)
-- **Node.js/Express** - Server framework
-- **PostgreSQL** - Primary database
-- **Redis** - Caching layer
-- **Elasticsearch** - Search engine
-- **AWS S3** - File storage
+### Backend
+- **Node.js** with Express.js
+- **MongoDB** with Mongoose
+- **JWT** for authentication
+- **Stripe** for payment processing
+- **Cloudinary** for image storage
+- **Nodemailer** for email
+- **Express Validator** for validation
 
-### Services
-- **Stripe/Razorpay** - Payment processing
-- **Twilio** - SMS and WhatsApp
-- **SendGrid** - Email service
-- **Google Maps** - Location services
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
-- npm or yarn
-- Git
+- Node.js (v14 or higher)
+- MongoDB (v4.4 or higher)
+- Stripe Account (for payments)
+- Cloudinary Account (for images)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/monstrac-carrent.git
+   git clone <repository-url>
    cd monstrac-carrent
    ```
 
 2. **Install dependencies**
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
-3. **Start development server**
+3. **Set up environment variables**
    ```bash
-   npm start
-   # or
-   yarn start
+   # Frontend
+   cp .env.example .env
+   
+   # Backend
+   cp backend/.env.example backend/.env
    ```
 
-4. **Open in browser**
-   Navigate to `http://localhost:3000`
+4. **Configure environment variables**
+   
+   **Frontend (.env):**
+   ```env
+   REACT_APP_API_URL=http://localhost:5000/api
+   REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-key
+   ```
 
-### Build for Production
+   **Backend (backend/.env):**
+   ```env
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/monstrac-carrent
+   JWT_SECRET=your-super-secret-jwt-key
+   STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+   CLOUDINARY_CLOUD_NAME=your-cloudinary-name
+   CLOUDINARY_API_KEY=your-cloudinary-key
+   CLOUDINARY_API_SECRET=your-cloudinary-secret
+   ```
 
-```bash
-npm run build
-# or
-yarn build
+5. **Start MongoDB**
+   ```bash
+   # Using MongoDB service
+   sudo systemctl start mongod
+   
+   # Or using Docker
+   docker run -d -p 27017:27017 --name mongodb mongo:latest
+   ```
+
+6. **Seed the database** (optional)
+   ```bash
+   npm run server:seed
+   ```
+
+7. **Start the application**
+   ```bash
+   # Development (both frontend and backend)
+   npm run dev
+   
+   # Or start separately
+   npm run client  # Frontend only
+   npm run server  # Backend only
+   ```
+
+8. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000/api
+   - API Health: http://localhost:5000/api/health
+
+## 📱 Application Structure
+
+```
+monstrac-carrent/
+├── src/                    # Frontend React application
+│   ├── components/         # Reusable UI components
+│   ├── pages/             # Page components
+│   ├── contexts/          # React contexts (Auth, Theme)
+│   ├── services/          # API service layer
+│   └── styles/            # Global styles
+├── backend/               # Backend Node.js application
+│   ├── models/            # MongoDB models
+│   ├── routes/            # API routes
+│   ├── middleware/        # Custom middleware
+│   └── scripts/           # Database seeding scripts
+└── public/                # Static assets
 ```
 
-## 📁 Project Structure
+## 🔑 Default Admin Account
 
-```
-src/
-├── components/           # Reusable UI components
-│   ├── sections/        # Homepage sections
-│   ├── CarCard.tsx      # Car display component
-│   ├── FilterPanel.tsx  # Search filters
-│   └── Navigation.tsx   # Main navigation
-├── contexts/            # React contexts
-│   ├── AuthContext.tsx  # Authentication state
-│   └── ThemeContext.tsx # Theme management
-├── pages/               # Page components
-│   ├── HomePage.tsx     # Landing page
-│   ├── CarsPage.tsx     # Car catalog
-│   ├── CarDetailPage.tsx # Individual car page
-│   ├── AboutPage.tsx    # About us
-│   ├── ContactPage.tsx  # Contact form
-│   ├── LoginPage.tsx    # User login
-│   ├── SignupPage.tsx   # User registration
-│   ├── CustomerDashboard.tsx # Customer panel
-│   └── AdminDashboard.tsx    # Admin panel
-├── App.tsx              # Main app component
-├── index.tsx            # Entry point
-└── index.css            # Global styles
-```
+After seeding the database, you can login with:
+- **Email**: admin@monstrac.com
+- **Password**: admin123
+
+## 📊 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
+- `PUT /api/auth/profile` - Update profile
+
+### Cars
+- `GET /api/cars` - Get all cars with filters
+- `GET /api/cars/:id` - Get single car
+- `POST /api/cars` - Create car (Admin)
+- `PUT /api/cars/:id` - Update car (Admin)
+
+### Bookings
+- `GET /api/bookings` - Get user bookings
+- `POST /api/bookings` - Create booking
+- `PUT /api/bookings/:id/status` - Update status (Admin)
+- `POST /api/bookings/:id/cancel` - Cancel booking
+
+### Admin
+- `GET /api/admin/dashboard` - Dashboard statistics
+- `GET /api/admin/analytics` - Detailed analytics
+
+### Payments
+- `POST /api/payments/create-payment-intent` - Create payment
+- `POST /api/payments/confirm-payment` - Confirm payment
+- `POST /api/payments/refund` - Process refund
 
 ## 🎨 Design System
 
 ### Colors
-- **Primary**: Neon Blue (#00d4ff)
-- **Secondary**: Neon Purple (#8b5cf6)
-- **Success**: Neon Green (#10b981)
-- **Warning**: Neon Orange (#f59e0b)
-- **Error**: Red (#ef4444)
-- **Dark Backgrounds**: Charcoal (#0f172a) to Dark Gray (#1e293b)
+- **Primary**: Dark theme with neon accents
+- **Neon Blue**: #00D4FF
+- **Neon Purple**: #8B5CF6
+- **Neon Green**: #10B981
+- **Neon Pink**: #EC4899
 
 ### Typography
-- **Primary Font**: Inter (UI text)
-- **Display Font**: Montserrat (Headings)
-- **Sizes**: Responsive scale from 0.875rem to 4rem
+- **Primary Font**: Inter
+- **Secondary Font**: Montserrat
 
 ### Components
-- **Buttons**: Gradient primary, outline secondary, ghost variants
-- **Cards**: Glass morphism with subtle borders
-- **Forms**: Dark inputs with neon focus states
-- **Modals**: Backdrop blur with smooth animations
+- Responsive grid layouts
+- Animated cards and buttons
+- Interactive forms with validation
+- Status indicators and badges
+- Loading states and skeletons
 
-## 🔧 Configuration
+## 🔒 Security Features
 
-### Environment Variables
-Create a `.env` file in the root directory:
+- JWT-based authentication
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- CORS configuration
+- Input validation and sanitization
+- Helmet security headers
+- SQL injection protection
 
-```env
-REACT_APP_API_URL=http://localhost:3001/api
-REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...
-REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_key
-REACT_APP_TWILIO_ACCOUNT_SID=your_twilio_sid
-REACT_APP_SENDGRID_API_KEY=your_sendgrid_key
-```
+## 📈 Performance Optimizations
 
-### Tailwind Configuration
-The project uses a custom Tailwind config with:
-- Dark theme colors
-- Custom animations
-- Neon glow effects
-- Glass morphism utilities
-
-## 📱 Responsive Breakpoints
-
-- **Mobile**: 320px - 640px
-- **Tablet**: 641px - 1024px
-- **Desktop**: 1025px+
-
-## 🎯 Features Implementation Status
-
-### ✅ Completed
-- [x] Project setup and configuration
-- [x] Dark theme design system
-- [x] Homepage with all sections
-- [x] Car catalog with filters
-- [x] Authentication pages
-- [x] Responsive navigation
-- [x] Component library
-- [x] Animation system
-
-### 🚧 In Progress
-- [ ] Car detail page with 3D viewer
-- [ ] Booking flow implementation
-- [ ] Payment integration
-- [ ] Dashboard pages
-- [ ] API integration
-- [ ] Notification system
-
-### 📋 Planned
-- [ ] Admin car management
-- [ ] Driver management
-- [ ] Analytics dashboard
-- [ ] Mobile app
-- [ ] PWA features
-- [ ] Testing suite
-- [ ] Performance optimization
+- React lazy loading
+- Image optimization
+- Code splitting
+- Memoization for expensive operations
+- Efficient database queries
+- CDN for static assets
 
 ## 🧪 Testing
 
-### Unit Tests
 ```bash
+# Run frontend tests
 npm test
-# or
-yarn test
-```
 
-### E2E Tests
-```bash
-npm run test:e2e
-# or
-yarn test:e2e
+# Run backend tests
+cd backend && npm test
+
+# Run all tests
+npm run test:all
 ```
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Frontend (Vercel)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Backend (Railway/Heroku)
 1. Connect your GitHub repository
 2. Set environment variables
 3. Deploy automatically
 
-### Netlify
-1. Build command: `npm run build`
-2. Publish directory: `build`
-3. Set environment variables
+### Database (MongoDB Atlas)
+1. Create a MongoDB Atlas cluster
+2. Update MONGODB_URI in environment variables
+3. Configure network access and database user
 
-### AWS/Docker
-```bash
-# Build Docker image
-docker build -t monstrac-carrent .
+## 📝 Environment Variables
 
-# Run container
-docker run -p 3000:3000 monstrac-carrent
-```
+### Frontend
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `REACT_APP_API_URL` | Backend API URL | Yes |
+| `REACT_APP_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | Yes |
+| `REACT_APP_GOOGLE_MAPS_API_KEY` | Google Maps API key | No |
 
-## 📊 Performance
-
-### Lighthouse Scores (Target)
-- **Performance**: 90+
-- **Accessibility**: 95+
-- **Best Practices**: 95+
-- **SEO**: 90+
-
-### Optimization Features
-- Code splitting
-- Lazy loading
-- Image optimization
-- Bundle analysis
-- Caching strategies
-
-## 🔒 Security
-
-### Implemented
-- Input validation
-- XSS protection
-- CSRF tokens
-- Secure headers
-- Environment variable protection
-
-### Planned
-- Rate limiting
-- API authentication
-- Data encryption
-- Audit logging
-
-## 🌐 Internationalization
-
-### Supported Languages
-- English (default)
-- Spanish (planned)
-- French (planned)
-- German (planned)
-
-### Currency Support
-- USD (default)
-- EUR
-- GBP
-- CAD
-- AUD
-
-## 📈 Analytics
-
-### Tracking
-- Google Analytics 4
-- Custom event tracking
-- User behavior analysis
-- Conversion tracking
+### Backend
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PORT` | Server port | No (5000) |
+| `MONGODB_URI` | MongoDB connection string | Yes |
+| `JWT_SECRET` | JWT signing secret | Yes |
+| `STRIPE_SECRET_KEY` | Stripe secret key | Yes |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | No |
+| `EMAIL_HOST` | SMTP host | No |
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-### Code Style
-- ESLint configuration
-- Prettier formatting
-- TypeScript strict mode
-- Component documentation
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🆘 Support
+
+- **Documentation**: [Project Wiki](https://github.com/your-repo/wiki)
+- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
+- **Email**: support@monstrac.com
+
 ## 🙏 Acknowledgments
 
-- **Three.js** - 3D graphics library
-- **Framer Motion** - Animation library
-- **Tailwind CSS** - Utility-first CSS
-- **React Three Fiber** - React Three.js integration
-- **Heroicons** - Beautiful SVG icons
+- [React](https://reactjs.org/) - Frontend framework
+- [Express.js](https://expressjs.com/) - Backend framework
+- [MongoDB](https://www.mongodb.com/) - Database
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Framer Motion](https://www.framer.com/motion/) - Animations
+- [Stripe](https://stripe.com/) - Payment processing
+- [Cloudinary](https://cloudinary.com/) - Image management
 
-## 📞 Support
+## 🔄 Changelog
 
-- **Email**: support@monstrac.com
-- **Documentation**: [docs.monstrac.com](https://docs.monstrac.com)
-- **Issues**: [GitHub Issues](https://github.com/your-username/monstrac-carrent/issues)
-
-## 🎉 Demo
-
-Live demo: [monstrac-carrent.vercel.app](https://monstrac-carrent.vercel.app)
+### v1.0.0 (2024-01-15)
+- Initial release
+- Complete frontend with React and TypeScript
+- Backend API with Node.js and Express
+- MongoDB database integration
+- Stripe payment processing
+- Admin and customer dashboards
+- Responsive design with dark theme
+- 3D animations and modern UI
+- Comprehensive booking system
+- Analytics and reporting features
 
 ---
 
