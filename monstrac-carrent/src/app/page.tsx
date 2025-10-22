@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { ArrowRight, Car, SteeringWheel } from "lucide-react";
+import { ArrowRight, Car, BadgeCheck, Headphones, ShieldCheck } from "lucide-react";
 
 export default function Home() {
   return (
@@ -56,19 +56,10 @@ export default function Home() {
               </a>
             </motion.div>
 
-            <div className="mt-6 flex items-center gap-6 text-sm text-[var(--muted)]">
-              <div className="flex items-center gap-2">
-                <SteeringWheel className="size-4 text-[var(--accent)]" />
-                Verified cars
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-block size-2 rounded-full bg-[var(--success)]" />
-                24/7 support
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-block size-2 rounded-full bg-[var(--accent-2)]" />
-                Insurance included
-              </div>
+            <div className="mt-6 flex flex-wrap items-center gap-6 text-sm text-[var(--muted)]">
+              <span className="inline-flex items-center gap-2"><BadgeCheck className="size-4 text-[var(--accent)]" /> Verified cars</span>
+              <span className="inline-flex items-center gap-2"><Headphones className="size-4 text-[var(--accent)]" /> 24/7 support</span>
+              <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4 text-[var(--accent-2)]" /> Insurance included</span>
             </div>
           </div>
 
