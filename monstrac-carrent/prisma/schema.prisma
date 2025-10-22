@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  // NOTE: Defaulting to SQLite for local dev/demo. Switch to "postgresql" and
+  // update DATABASE_URL for production environments.
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================
+// Enums
+// ==========================
+
+enum Role {
+  CUSTOMER
+  OWNER
+  ADMIN
+  SUPPORT
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
+  CNG
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ON_TRIP
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STRIPE
+  RAZORPAY
+  PAYPAL
+  UPI
+  CARD
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  REFUND_PENDING
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionCategory {
+  PAYMENT
+  REFUND
+  WALLET_TOPUP
+  EXPENSE
+  COMMISSION
+}
+
+// ==========================
+// Models
+// ==========================
+
+model User {
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  phone          String?       @unique
+  role           Role          @default(CUSTOMER)
+  emailVerified  DateTime?
+  phoneVerified  Boolean       @default(false)
+  hashedPassword String?
+  walletBalance  Decimal       @default(0)
+
+  bookings       Booking[]
+  carsOwned      Car[]         @relation("UserCars")
+  transactions   Transaction[]
+  reviews        Review[]
+
+  referralCodes      Referral[]    @relation("OwnerReferralCodes")
+  referralsMade      Referral[]    @relation("ReferrerToReferral")
+  referralsReceived  Referral[]    @relation("ReferredUserToReferral")
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Car {
+  id               String            @id @default(cuid())
+  ownerId          String
+  owner            User              @relation(fields: [ownerId], references: [id], name: "UserCars")
+  title            String
+  brand            String
+  model            String
+  year             Int
+  registrationNo   String            @unique
+  vin              String?
+  seatCount        Int
+  fuelType         FuelType
+  transmission     Transmission
+  color            String
+
+  priceHour        Decimal           @default(0)
+  priceDay         Decimal           @default(0)
+  priceWeek        Decimal           @default(0)
+  perKmPrice       Decimal           @default(0)
+  depositAmount    Decimal           @default(0)
+  mileageIncluded  Int               @default(0) // per day in km
+
+  images           Json              // string[] of image URLs
+  model3dUrl       String?
+  features         Json              // arbitrary feature flags
+
+  availability     CarAvailability[]
+  bookings         Booking[]
+  reviews          Review[]
+  drivers          Driver[]
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model CarAvailability {
+  id        String   @id @default(cuid())
+  carId     String
+  car       Car      @relation(fields: [carId], references: [id])
+  dateFrom  DateTime
+  dateTo    DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model Driver {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String   @unique
+  licenseNo     String   @unique
+  verified      Boolean  @default(false)
+  attachedCarId String?
+  attachedCar   Car?     @relation(fields: [attachedCarId], references: [id])
+  bookings      Booking[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Booking {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  carId          String
+  car            Car            @relation(fields: [carId], references: [id])
+  driverId       String?
+  driver         Driver?        @relation(fields: [driverId], references: [id])
+
+  pickupAt       DateTime
+  returnAt       DateTime
+  pickupLoc      String
+  returnLoc      String
+
+  status         BookingStatus  @default(PENDING)
+  addons         Json           // selected add-ons
+  priceSubtotal  Decimal        @default(0)
+  taxAmount      Decimal        @default(0)
+  depositAmount  Decimal        @default(0)
+  totalPrice     Decimal        @default(0)
+
+  payment        Payment?
+  transactions   Transaction[]
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  bookingId      String        @unique
+  booking        Booking       @relation(fields: [bookingId], references: [id])
+  amount         Decimal       @default(0)
+  currency       String        @default("USD")
+  method         PaymentMethod
+  status         PaymentStatus @default(INITIATED)
+  txnId          String?
+  providerData   Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String               @id @default(cuid())
+  userId      String?
+  user        User?                @relation(fields: [userId], references: [id])
+  bookingId   String?
+  booking     Booking?             @relation(fields: [bookingId], references: [id])
+  amount      Decimal
+  type        TransactionType
+  category    TransactionCategory
+  note        String?
+  createdAt   DateTime             @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  carId     String
+  car       Car      @relation(fields: [carId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Referral {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  ownerUserId     String?
+  owner           User?    @relation("OwnerReferralCodes", fields: [ownerUserId], references: [id])
+  referrerUserId  String?
+  referrer        User?    @relation("ReferrerToReferral", fields: [referrerUserId], references: [id])
+  referredUserId  String?
+  referredUser    User?    @relation("ReferredUserToReferral", fields: [referredUserId], references: [id])
+  metadata        Json?
+  createdAt       DateTime @default(now())
+}
+
+model AffiliateCampaign {
+  id            String   @id @default(cuid())
+  name          String
+  codePrefix    String   @unique
+  commission    Json     // e.g. { type: "PERCENT", value: 5 }
+  startsAt      DateTime?
+  endsAt        DateTime?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
