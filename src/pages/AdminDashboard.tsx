@@ -36,6 +36,9 @@ import StatCard from '../components/dashboard/StatCard';
 import AnimatedButton from '../components/dashboard/AnimatedButton';
 import AnimatedTable from '../components/dashboard/AnimatedTable';
 import ProgressRing from '../components/dashboard/ProgressRing';
+import Dashboard3DBackground from '../components/3d/Dashboard3DBackground';
+import CarImage from '../components/CarImage';
+import Loading3D from '../components/3d/Loading3D';
 import apiService from '../services/api';
 
 interface Car {
@@ -198,7 +201,9 @@ const AdminDashboard: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="w-16 h-16 border-4 border-neon-blue/30 border-t-neon-blue rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-48 h-48 mb-4">
+            <Loading3D size={2} />
+          </div>
           <p className="text-gray-400">Loading admin dashboard...</p>
         </motion.div>
       </div>
@@ -206,7 +211,16 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 relative">
+      {/* 3D Background */}
+      <div className="fixed inset-0 z-0">
+        <Dashboard3DBackground 
+          height="100vh" 
+          showCars={true}
+          showFloatingElements={true}
+          showCards={true}
+        />
+      </div>
       {/* Header */}
       <motion.div
         className="bg-gradient-to-r from-dark-800/80 to-dark-900/80 backdrop-blur-sm border-b border-dark-700/50"
@@ -264,7 +278,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <motion.div
@@ -478,9 +492,14 @@ const AdminDashboard: React.FC = () => {
                         label: 'Car',
                         render: (_, row) => (
                           <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-lg flex items-center justify-center">
-                              <TruckIcon className="w-6 h-6 text-neon-blue" />
-                            </div>
+                            <CarImage
+                              carName={row.name}
+                              brand={row.brand}
+                              price={row.price}
+                              size="sm"
+                              animated={false}
+                              glow={false}
+                            />
                             <div>
                               <p className="text-white font-medium">{row.name}</p>
                               <p className="text-gray-400 text-sm">{row.brand} {row.model} • {row.year}</p>

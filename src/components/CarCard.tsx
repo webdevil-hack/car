@@ -10,6 +10,7 @@ import {
   CogIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import CarImage from './CarImage';
 
 interface Car {
   id: string;
@@ -58,10 +59,15 @@ const CarCard: React.FC<CarCardProps> = ({ car, viewMode }) => {
           <div className="bg-dark-800/80 backdrop-blur-sm rounded-2xl border border-dark-700/50 hover:border-accent-primary/50 transition-all duration-300 group-hover:shadow-neon overflow-hidden">
             <div className="flex">
               {/* Image */}
-              <div className="w-64 h-48 bg-gradient-to-br from-dark-700 to-dark-800 flex items-center justify-center relative">
-                <div className="w-full h-full bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center">
-                  <CogIcon className="w-16 h-16 text-gray-400" />
-                </div>
+              <div className="w-64 h-48 bg-gradient-to-br from-dark-700 to-dark-800 flex items-center justify-center relative p-4">
+                <CarImage
+                  carName={car.name}
+                  brand={car.brand}
+                  price={car.price}
+                  size="lg"
+                  animated={true}
+                  glow={true}
+                />
                 
                 {/* Badge */}
                 {car.badge && (
@@ -221,10 +227,15 @@ const CarCard: React.FC<CarCardProps> = ({ car, viewMode }) => {
           </button>
 
           {/* Car Image */}
-          <div className="relative h-48 bg-gradient-to-br from-dark-700 to-dark-800 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center">
-              <CogIcon className="w-16 h-16 text-gray-400" />
-            </div>
+          <div className="relative h-48 bg-gradient-to-br from-dark-700 to-dark-800 overflow-hidden flex items-center justify-center p-4">
+            <CarImage
+              carName={car.name}
+              brand={car.brand}
+              price={car.price}
+              size="lg"
+              animated={true}
+              glow={true}
+            />
             
             {/* Availability Overlay */}
             {!car.isAvailable && (

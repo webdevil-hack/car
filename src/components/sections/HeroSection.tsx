@@ -1,28 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-// import { Canvas } from '@react-three/fiber';
-// import { OrbitControls, Environment } from '@react-three/drei';
 import { 
   ShieldCheckIcon, 
   ClockIcon, 
   CheckBadgeIcon 
 } from '@heroicons/react/24/outline';
-
-// 3D Car Component - Placeholder for now
-const Car3D: React.FC = () => {
-  return (
-    <div className="w-full h-96 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-2xl flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-32 h-16 bg-gradient-neon rounded-lg mx-auto mb-4 flex items-center justify-center">
-          <span className="text-dark-900 font-bold text-2xl">🚗</span>
-        </div>
-        <p className="text-gray-300 text-lg">3D Car Model</p>
-        <p className="text-gray-400 text-sm">Interactive 3D viewer coming soon</p>
-      </div>
-    </div>
-  );
-};
+import Hero3DBackground from '../3d/Hero3DBackground';
 
 const HeroSection: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -107,8 +91,8 @@ const HeroSection: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative h-96 lg:h-[500px]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-dark-800/50 to-dark-900/50 rounded-2xl backdrop-blur-sm border border-dark-700/50">
-              <Car3D />
+            <div className="absolute inset-0 rounded-2xl overflow-hidden">
+              <Hero3DBackground height="100%" />
             </div>
             
             {/* Floating Elements */}

@@ -7,6 +7,7 @@ import SearchBar from '../components/SearchBar';
 import SortDropdown from '../components/SortDropdown';
 import ViewToggle from '../components/ViewToggle';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CarImage from '../components/CarImage';
 import apiService from '../services/api';
 
 interface Car {

@@ -30,6 +30,9 @@ import StatCard from '../components/dashboard/StatCard';
 import AnimatedButton from '../components/dashboard/AnimatedButton';
 import AnimatedTable from '../components/dashboard/AnimatedTable';
 import ProgressRing from '../components/dashboard/ProgressRing';
+import Dashboard3DBackground from '../components/3d/Dashboard3DBackground';
+import CarImage from '../components/CarImage';
+import Loading3D from '../components/3d/Loading3D';
 import apiService from '../services/api';
 
 interface Booking {
@@ -184,7 +187,9 @@ const CustomerDashboard: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="w-16 h-16 border-4 border-neon-blue/30 border-t-neon-blue rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-48 h-48 mb-4">
+            <Loading3D size={2} />
+          </div>
           <p className="text-gray-400">Loading your dashboard...</p>
         </motion.div>
       </div>
@@ -192,7 +197,16 @@ const CustomerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 relative">
+      {/* 3D Background */}
+      <div className="fixed inset-0 z-0">
+        <Dashboard3DBackground 
+          height="100vh" 
+          showCars={true}
+          showFloatingElements={true}
+          showCards={true}
+        />
+      </div>
       {/* Header */}
       <motion.div
         className="bg-gradient-to-r from-dark-800/80 to-dark-900/80 backdrop-blur-sm border-b border-dark-700/50"
@@ -250,7 +264,7 @@ const CustomerDashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <motion.div
@@ -545,16 +559,21 @@ const CustomerDashboard: React.FC = () => {
                       >
                         <AnimatedCard className="p-6 hover:border-neon-pink/30">
                           <div className="flex items-center space-x-4 mb-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-neon-pink/20 to-neon-purple/20 rounded-xl flex items-center justify-center">
-                              <HeartIcon className="w-8 h-8 text-neon-pink" />
-                            </div>
+                            <CarImage
+                              carName={car.name}
+                              brand={car.brand}
+                              price={car.price}
+                              size="md"
+                              animated={true}
+                              glow={true}
+                            />
                             <div className="flex-1">
                               <h3 className="text-white font-semibold">{car.name}</h3>
                               <p className="text-gray-400 text-sm">{car.brand} {car.model}</p>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-yellow-400 text-sm font-medium">{car.rating}</span>
+                              <div className="flex items-center space-x-1 mt-1">
+                                <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-yellow-400 text-sm font-medium">{car.rating}</span>
+                              </div>
                             </div>
                           </div>
                           
