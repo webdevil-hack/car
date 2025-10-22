@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* Design tokens: default to dark theme */
+:root {
+  --background: #0b0d0f; /* deep charcoal */
+  --surface: #0f1216;
+  --surface-2: #11161c;
+  --card: #0e1216;
+  --border: #1f2833;
+  --ring: #00e5ff;
+
+  --foreground: #e8edf2; /* high-contrast text */
+  --muted-foreground: #9aa4b2;
+
+  --primary: #00e5ff; /* neon cyan */
+  --primary-contrast: #001317;
+  --accent: #7c4dff; /* neon violet */
+  --accent-2: #00ffa3; /* neon mint */
+
+  --radius: 12px;
+}
+
+/* Light theme override (controlled via next-themes using class="light") */
+html.light {
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #f1f5f9;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --ring: #1f2937;
+
+  --foreground: #0f172a;
+  --muted-foreground: #475569;
+
+  --primary: #0ea5e9;
+  --primary-contrast: #ecfeff;
+  --accent: #7c3aed;
+  --accent-2: #06b6d4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --ring: var(--ring);
+  --radius-md: var(--radius);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+/* Background and typography base */
+body {
+  background: radial-gradient(1200px 600px at 80% -10%, #0a1820 0%, transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, #120a1f 0%, transparent 60%),
+    var(--background);
+  color: var(--foreground);
+}
+
+/* Utility helpers */
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border);
+  backdrop-filter: saturate(140%) blur(12px);
+}
+
+.neon {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--primary), transparent 70%),
+    0 0 24px color-mix(in srgb, var(--primary), transparent 80%);
+}
+
+/* Basic motion presets */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 600ms ease-out both;
+}

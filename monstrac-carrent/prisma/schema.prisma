@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  phone          String?  @unique
+  passwordHash   String
+  role           Role     @default(CUSTOMER)
+  verified       Boolean  @default(false)
+  walletBalance  Int      @default(0)
+  createdAt      DateTime @default(now())
+  bookings       Booking[]
+  ownedCars      Car[]    @relation("OwnedCars")
+}
+
+model Car {
+  id            String   @id @default(cuid())
+  ownerId       String?
+  owner         User?    @relation("OwnedCars", fields: [ownerId], references: [id])
+  title         String
+  brand         String
+  model         String
+  year          Int
+  priceHour     Int
+  priceDay      Int
+  deposit       Int       @default(0)
+  features      Json
+  availability  Json
+  createdAt     DateTime  @default(now())
+  bookings      Booking[]
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  carId      String
+  car        Car      @relation(fields: [carId], references: [id])
+  pickupAt   DateTime
+  returnAt   DateTime
+  pickupLoc  String
+  returnLoc  String
+  status     BookingStatus @default(PENDING)
+  totalPrice Int
+  addons     Json
+  payment    Payment?
+  createdAt  DateTime @default(now())
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  amount     Int
+  method     String
+  status     String
+  txnId      String?
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  CUSTOMER
+  OWNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
