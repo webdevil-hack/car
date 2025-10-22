@@ -25,10 +25,5 @@
     "REACT_APP_API_URL": "@react_app_api_url",
     "REACT_APP_STRIPE_PUBLISHABLE_KEY": "@react_app_stripe_publishable_key",
     "REACT_APP_GOOGLE_MAPS_API_KEY": "@react_app_google_maps_api_key"
-  },
-  "functions": {
-    "src/pages/api/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
   }
 }
