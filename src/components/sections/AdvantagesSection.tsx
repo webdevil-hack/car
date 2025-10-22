@@ -8,7 +8,9 @@ import {
   CurrencyDollarIcon,
   ArrowPathIcon,
   SparklesIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  TruckIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 
 const AdvantagesSection: React.FC = () => {
@@ -156,7 +158,7 @@ const AdvantagesSection: React.FC = () => {
         >
           {[
             { number: '10K+', label: 'Happy Customers', icon: UserGroupIcon },
-            { number: '500+', label: 'Premium Vehicles', icon: CarIcon },
+            { number: '500+', label: 'Premium Vehicles', icon: TruckIcon },
             { number: '50+', label: 'Cities Covered', icon: MapPinIcon },
             { number: '99%', label: 'Satisfaction Rate', icon: CheckBadgeIcon }
           ].map((stat, index) => (

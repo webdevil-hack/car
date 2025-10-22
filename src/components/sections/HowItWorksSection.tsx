@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   MagnifyingGlassIcon,
-  CarIcon,
+  TruckIcon,
   CreditCardIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
@@ -26,7 +26,7 @@ const HowItWorksSection: React.FC = () => {
       id: 2,
       title: 'Book & Pay',
       description: 'Complete your booking with secure payment and instant confirmation',
-      icon: CarIcon,
+      icon: TruckIcon,
       color: 'from-neon-purple to-purple-600',
       details: [
         'Choose your preferred vehicle',

@@ -7,7 +7,8 @@ import {
   EyeIcon,
   BoltIcon,
   UserGroupIcon,
-  CogIcon
+  CogIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
@@ -153,7 +154,7 @@ const FeaturedCarsSection: React.FC = () => {
                 <div className="relative h-48 bg-gradient-to-br from-dark-700 to-dark-800 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-900/50 to-transparent z-10"></div>
                   <div className="w-full h-full bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center">
-                    <CarIcon className="w-16 h-16 text-gray-400" />
+                    <TruckIcon className="w-16 h-16 text-gray-400" />
                   </div>
                   
                   {/* Availability Overlay */}

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
-  CarIcon,
+  TruckIcon as CarIcon,
   TruckIcon,
   BoltIcon,
   StarIcon,

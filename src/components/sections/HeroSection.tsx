@@ -1,25 +1,26 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
+// import { Canvas } from '@react-three/fiber';
+// import { OrbitControls, Environment } from '@react-three/drei';
 import { 
   ShieldCheckIcon, 
   ClockIcon, 
   CheckBadgeIcon 
 } from '@heroicons/react/24/outline';
 
-// 3D Car Component
+// 3D Car Component - Placeholder for now
 const Car3D: React.FC = () => {
-  const { scene } = useGLTF('/models/car.glb');
-  
   return (
-    <primitive 
-      object={scene} 
-      scale={[2, 2, 2]} 
-      position={[0, -1, 0]}
-      rotation={[0, Math.PI / 4, 0]}
-    />
+    <div className="w-full h-96 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-2xl flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-32 h-16 bg-gradient-neon rounded-lg mx-auto mb-4 flex items-center justify-center">
+          <span className="text-dark-900 font-bold text-2xl">🚗</span>
+        </div>
+        <p className="text-gray-300 text-lg">3D Car Model</p>
+        <p className="text-gray-400 text-sm">Interactive 3D viewer coming soon</p>
+      </div>
+    </div>
   );
 };
 
@@ -107,23 +108,7 @@ const HeroSection: React.FC = () => {
             className="relative h-96 lg:h-[500px]"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-dark-800/50 to-dark-900/50 rounded-2xl backdrop-blur-sm border border-dark-700/50">
-              <Canvas
-                ref={canvasRef}
-                camera={{ position: [5, 5, 5], fov: 50 }}
-                className="w-full h-full"
-              >
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1} />
-                <pointLight position={[0, 10, 0]} intensity={0.5} color="#00d4ff" />
-                <Environment preset="city" />
-                <Car3D />
-                <OrbitControls 
-                  enableZoom={false} 
-                  enablePan={false}
-                  autoRotate
-                  autoRotateSpeed={2}
-                />
-              </Canvas>
+              <Car3D />
             </div>
             
             {/* Floating Elements */}

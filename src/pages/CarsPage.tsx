@@ -39,7 +39,7 @@ const CarsPage: React.FC = () => {
   const [filters, setFilters] = useState({
     search: '',
     category: '',
-    priceRange: [0, 500],
+    priceRange: [0, 500] as [number, number],
     transmission: '',
     fuel: '',
     seats: '',
