@@ -1,31 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChartBarIcon,
   TruckIcon,
-  UserGroupIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
+  CalendarDaysIcon,
+  UsersIcon,
+  Cog6ToothIcon,
   PlusIcon,
+  EyeIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ArrowPathIcon,
+  SparklesIcon,
+  ShieldCheckIcon,
   BellIcon,
-  CogIcon,
-  DocumentTextIcon,
-  PhotoIcon,
+  CreditCardIcon,
   MapPinIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
+import { 
+  ChartBarIcon as ChartSolid,
+  TruckIcon as TruckSolid,
+  CalendarDaysIcon as CalendarSolid,
+  UsersIcon as UsersSolid,
+  Cog6ToothIcon as CogSolid
+} from '@heroicons/react/24/solid';
+import AnimatedCard from '../components/dashboard/AnimatedCard';
+import StatCard from '../components/dashboard/StatCard';
+import AnimatedButton from '../components/dashboard/AnimatedButton';
+import AnimatedTable from '../components/dashboard/AnimatedTable';
+import ProgressRing from '../components/dashboard/ProgressRing';
+import apiService from '../services/api';
 
 interface Car {
   id: string;
@@ -35,32 +46,41 @@ interface Car {
   year: number;
   category: string;
   price: number;
-  rating: number;
   status: 'available' | 'rented' | 'maintenance' | 'unavailable';
-  location: string;
-  mileage: number;
-  fuelType: string;
-  transmission: string;
-  seats: number;
-  features: string[];
+  rating: {
+    average: number;
+    count: number;
+  };
   images: string[];
-  createdAt: string;
-  lastRented: string;
-  totalRentals: number;
-  totalRevenue: number;
+  location: {
+    name: string;
+    address: {
+      city: string;
+      state: string;
+    };
+  };
 }
 
 interface Booking {
   id: string;
-  carName: string;
-  customerName: string;
-  customerEmail: string;
-  startDate: string;
-  endDate: string;
-  totalDays: number;
-  totalPrice: number;
+  user: {
+    name: string;
+    email: string;
+  };
+  car: {
+    name: string;
+    brand: string;
+    model: string;
+  };
+  dates: {
+    startDate: string;
+    endDate: string;
+    totalDays: number;
+  };
+  pricing: {
+    total: number;
+  };
   status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
   createdAt: string;
 }
 
@@ -68,12 +88,11 @@ interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  role: 'customer' | 'admin' | 'manager';
   status: 'active' | 'inactive' | 'suspended';
-  memberSince: string;
   totalBookings: number;
   totalSpent: number;
-  lastLogin: string;
+  createdAt: string;
 }
 
 interface Analytics {
@@ -81,12 +100,14 @@ interface Analytics {
   monthlyRevenue: number;
   totalBookings: number;
   activeBookings: number;
-  totalCars: number;
-  availableCars: number;
   totalUsers: number;
   newUsers: number;
-  averageRating: number;
-  occupancyRate: number;
+  totalCars: number;
+  availableCars: number;
+  revenueGrowth: number;
+  userGrowth: number;
+  bookingGrowth: number;
+  carUtilization: number;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -94,807 +115,755 @@ const AdminDashboard: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [analytics, setAnalytics] = useState<Analytics>({
-    totalRevenue: 125000,
-    monthlyRevenue: 18500,
-    totalBookings: 1247,
-    activeBookings: 23,
-    totalCars: 156,
-    availableCars: 98,
-    totalUsers: 2847,
-    newUsers: 47,
-    averageRating: 4.7,
-    occupancyRate: 78.5
-  });
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data - in real app, fetch from API
-    setCars([
-      {
-        id: '1',
-        name: 'BMW X5',
-        brand: 'BMW',
-        model: 'X5',
-        year: 2023,
-        category: 'SUV',
-        price: 150,
-        rating: 4.8,
-        status: 'available',
-        location: 'Downtown Office',
-        mileage: 15000,
-        fuelType: 'Gasoline',
-        transmission: 'Automatic',
-        seats: 5,
-        features: ['GPS', 'Bluetooth', 'Backup Camera', 'Leather Seats'],
-        images: ['/api/placeholder/400/300'],
-        createdAt: '2023-01-15',
-        lastRented: '2024-01-10',
-        totalRentals: 45,
-        totalRevenue: 6750
-      },
-      {
-        id: '2',
-        name: 'Tesla Model 3',
-        brand: 'Tesla',
-        model: 'Model 3',
-        year: 2023,
-        category: 'Electric',
-        price: 160,
-        rating: 4.9,
-        status: 'rented',
-        location: 'Airport Terminal',
-        mileage: 22000,
-        fuelType: 'Electric',
-        transmission: 'Automatic',
-        seats: 5,
-        features: ['Autopilot', 'Supercharging', 'Premium Audio', 'Glass Roof'],
-        images: ['/api/placeholder/400/300'],
-        createdAt: '2023-02-20',
-        lastRented: '2024-01-15',
-        totalRentals: 38,
-        totalRevenue: 6080
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch analytics
+        const analyticsResponse = await apiService.getDashboardStats();
+        setAnalytics(analyticsResponse.data.overview);
+        
+        // Fetch cars
+        const carsResponse = await apiService.getCars({ limit: 50 });
+        setCars(carsResponse.data.cars);
+        
+        // Fetch bookings
+        const bookingsResponse = await apiService.getBookings({ limit: 50 });
+        setBookings(bookingsResponse.data.bookings);
+        
+        // Fetch users
+        const usersResponse = await apiService.getUsers({ limit: 50 });
+        setUsers(usersResponse.data.users);
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+      } finally {
+        setLoading(false);
       }
-    ]);
+    };
 
-    setBookings([
-      {
-        id: '1',
-        carName: 'BMW X5',
-        customerName: 'John Doe',
-        customerEmail: 'john.doe@example.com',
-        startDate: '2024-01-20',
-        endDate: '2024-01-25',
-        totalDays: 5,
-        totalPrice: 750,
-        status: 'confirmed',
-        paymentStatus: 'paid',
-        createdAt: '2024-01-15'
-      },
-      {
-        id: '2',
-        carName: 'Tesla Model 3',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane.smith@example.com',
-        startDate: '2024-01-18',
-        endDate: '2024-01-22',
-        totalDays: 4,
-        totalPrice: 640,
-        status: 'active',
-        paymentStatus: 'paid',
-        createdAt: '2024-01-10'
-      }
-    ]);
-
-    setUsers([
-      {
-        id: '1',
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+1 (555) 123-4567',
-        status: 'active',
-        memberSince: '2023-01-15',
-        totalBookings: 12,
-        totalSpent: 2450,
-        lastLogin: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        phone: '+1 (555) 987-6543',
-        status: 'active',
-        memberSince: '2023-03-20',
-        totalBookings: 8,
-        totalSpent: 1890,
-        lastLogin: '2024-01-14'
-      }
-    ]);
+    fetchData();
   }, []);
 
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: ChartBarIcon, iconSolid: ChartSolid },
+    { id: 'cars', label: 'Cars', icon: TruckIcon, iconSolid: TruckSolid },
+    { id: 'bookings', label: 'Bookings', icon: CalendarDaysIcon, iconSolid: CalendarSolid },
+    { id: 'users', label: 'Users', icon: UsersIcon, iconSolid: UsersSolid },
+    { id: 'settings', label: 'Settings', icon: Cog6ToothIcon, iconSolid: CogSolid }
+  ];
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available': return 'text-green-400 bg-green-400/20';
-      case 'rented': return 'text-blue-400 bg-blue-400/20';
-      case 'maintenance': return 'text-yellow-400 bg-yellow-400/20';
-      case 'unavailable': return 'text-red-400 bg-red-400/20';
-      case 'confirmed': return 'text-green-400 bg-green-400/20';
-      case 'pending': return 'text-yellow-400 bg-yellow-400/20';
-      case 'active': return 'text-blue-400 bg-blue-400/20';
-      case 'completed': return 'text-gray-400 bg-gray-400/20';
-      case 'cancelled': return 'text-red-400 bg-red-400/20';
-      case 'active': return 'text-green-400 bg-green-400/20';
-      case 'inactive': return 'text-gray-400 bg-gray-400/20';
-      case 'suspended': return 'text-red-400 bg-red-400/20';
-      default: return 'text-gray-400 bg-gray-400/20';
-    }
+    const colors = {
+      available: 'text-green-400 bg-green-400/10 border-green-400/20',
+      rented: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+      maintenance: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+      unavailable: 'text-red-400 bg-red-400/10 border-red-400/20',
+      pending: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+      confirmed: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+      active: 'text-green-400 bg-green-400/10 border-green-400/20',
+      completed: 'text-gray-400 bg-gray-400/10 border-gray-400/20',
+      cancelled: 'text-red-400 bg-red-400/10 border-red-400/20',
+      active: 'text-green-400 bg-green-400/10 border-green-400/20',
+      inactive: 'text-gray-400 bg-gray-400/10 border-gray-400/20',
+      suspended: 'text-red-400 bg-red-400/10 border-red-400/20'
+    };
+    return colors[status as keyof typeof colors] || colors.pending;
   };
 
-  const tabs = [
-    { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-    { id: 'cars', name: 'Cars', icon: TruckIcon },
-    { id: 'bookings', name: 'Bookings', icon: CalendarIcon },
-    { id: 'users', name: 'Users', icon: UserGroupIcon },
-    { id: 'analytics', name: 'Analytics', icon: ChartBarIcon },
-    { id: 'settings', name: 'Settings', icon: CogIcon }
-  ];
+  const getStatusIcon = (status: string) => {
+    const icons = {
+      available: CheckCircleIcon,
+      rented: ClockIcon,
+      maintenance: Cog6ToothIcon,
+      unavailable: XCircleIcon,
+      pending: ClockIcon,
+      confirmed: ShieldCheckIcon,
+      active: SparklesIcon,
+      completed: CheckCircleIcon,
+      cancelled: XCircleIcon,
+      active: CheckCircleIcon,
+      inactive: XCircleIcon,
+      suspended: XCircleIcon
+    };
+    return icons[status as keyof typeof icons] || ClockIcon;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="w-16 h-16 border-4 border-neon-blue/30 border-t-neon-blue rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading admin dashboard...</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-900">
       {/* Header */}
-      <div className="bg-dark-800 border-b border-dark-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+      <motion.div
+        className="bg-gradient-to-r from-dark-800/80 to-dark-900/80 backdrop-blur-sm border-b border-dark-700/50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-gray-400 mt-1">Manage your car rental business</p>
+              <motion.h1
+                className="text-3xl font-bold text-white mb-2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Admin Dashboard 🚀
+              </motion.h1>
+              <motion.p
+                className="text-gray-400"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                Manage your car rental business
+              </motion.p>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                <BellIcon className="w-6 h-6" />
-              </button>
-              <button className="bg-gradient-neon text-dark-900 px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Add Car
-              </button>
-            </div>
+            
+            <motion.div
+              className="flex items-center space-x-4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <AnimatedButton
+                variant="ghost"
+                size="sm"
+                icon={<BellIcon className="w-5 h-5" />}
+                className="relative"
+              >
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              </AnimatedButton>
+              
+              <AnimatedButton
+                variant="primary"
+                size="sm"
+                icon={<PlusIcon className="w-5 h-5" />}
+                gradient
+                glow
+              >
+                Add New
+              </AnimatedButton>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <div className="lg:w-64">
-            <nav className="space-y-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-neon text-dark-900'
-                      : 'text-gray-400 hover:text-white hover:bg-dark-800'
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5 mr-3" />
-                  {tab.name}
-                </button>
-              ))}
-            </nav>
-          </div>
+          <motion.div
+            className="lg:w-80"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <AnimatedCard className="p-2">
+              <nav className="space-y-2">
+                {tabs.map((tab, index) => {
+                  const Icon = activeTab === tab.id ? tab.iconSolid : tab.icon;
+                  return (
+                    <motion.button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`
+                        w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200
+                        ${activeTab === tab.id 
+                          ? 'bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 text-white border border-neon-blue/30' 
+                          : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
+                        }
+                      `}
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{tab.label}</span>
+                      {activeTab === tab.id && (
+                        <motion.div
+                          className="ml-auto w-2 h-2 bg-neon-blue rounded-full"
+                          layoutId="activeTab"
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </nav>
+            </AnimatedCard>
+          </motion.div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Overview Tab */}
-            {activeTab === 'overview' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Revenue</p>
-                        <p className="text-2xl font-bold text-white">${analytics.totalRevenue.toLocaleString()}</p>
-                        <p className="text-green-400 text-sm flex items-center">
-                          <ArrowUpIcon className="w-4 h-4 mr-1" />
-                          +12.5% from last month
-                        </p>
-                      </div>
-                      <CurrencyDollarIcon className="w-8 h-8 text-neon-green" />
-                    </div>
+            <AnimatePresence mode="wait">
+              {activeTab === 'overview' && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <StatCard
+                      title="Total Revenue"
+                      value={`$${analytics?.totalRevenue?.toLocaleString() || '0'}`}
+                      change={{ value: analytics?.revenueGrowth || 0, type: analytics?.revenueGrowth && analytics.revenueGrowth > 0 ? 'increase' : 'decrease' }}
+                      icon={<TrendingUpIcon className="w-6 h-6" />}
+                      color="green"
+                      delay={0}
+                    />
+                    <StatCard
+                      title="Total Bookings"
+                      value={analytics?.totalBookings || 0}
+                      change={{ value: analytics?.bookingGrowth || 0, type: analytics?.bookingGrowth && analytics.bookingGrowth > 0 ? 'increase' : 'decrease' }}
+                      icon={<CalendarDaysIcon className="w-6 h-6" />}
+                      color="blue"
+                      delay={0.1}
+                    />
+                    <StatCard
+                      title="Total Users"
+                      value={analytics?.totalUsers || 0}
+                      change={{ value: analytics?.userGrowth || 0, type: analytics?.userGrowth && analytics.userGrowth > 0 ? 'increase' : 'decrease' }}
+                      icon={<UsersIcon className="w-6 h-6" />}
+                      color="purple"
+                      delay={0.2}
+                    />
+                    <StatCard
+                      title="Available Cars"
+                      value={`${analytics?.availableCars || 0}/${analytics?.totalCars || 0}`}
+                      icon={<TruckIcon className="w-6 h-6" />}
+                      color="orange"
+                      delay={0.3}
+                    />
                   </div>
-                  <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Bookings</p>
-                        <p className="text-2xl font-bold text-white">{analytics.totalBookings}</p>
-                        <p className="text-blue-400 text-sm flex items-center">
-                          <ArrowUpIcon className="w-4 h-4 mr-1" />
-                          +8.2% from last month
-                        </p>
-                      </div>
-                      <CalendarIcon className="w-8 h-8 text-neon-blue" />
-                    </div>
-                  </div>
-                  <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Cars</p>
-                        <p className="text-2xl font-bold text-white">{analytics.totalCars}</p>
-                        <p className="text-gray-400 text-sm">{analytics.availableCars} available</p>
-                      </div>
-                      <TruckIcon className="w-8 h-8 text-neon-purple" />
-                    </div>
-                  </div>
-                  <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Users</p>
-                        <p className="text-2xl font-bold text-white">{analytics.totalUsers}</p>
-                        <p className="text-green-400 text-sm flex items-center">
-                          <ArrowUpIcon className="w-4 h-4 mr-1" />
-                          +{analytics.newUsers} this month
-                        </p>
-                      </div>
-                      <UserGroupIcon className="w-8 h-8 text-neon-pink" />
-                    </div>
-                  </div>
-                </div>
 
-                {/* Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-dark-800 rounded-xl border border-dark-700">
-                    <div className="p-6 border-b border-dark-700">
-                      <h3 className="text-xl font-semibold text-white">Recent Bookings</h3>
-                    </div>
-                    <div className="p-6">
+                  {/* Charts and Analytics */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <AnimatedCard delay={0.4} className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-6">Revenue Overview</h3>
+                      <div className="flex items-center justify-center h-64">
+                        <ProgressRing
+                          progress={analytics?.carUtilization || 0}
+                          size={160}
+                          color="#00D4FF"
+                          label="Car Utilization"
+                        />
+                      </div>
+                    </AnimatedCard>
+
+                    <AnimatedCard delay={0.5} className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-6">Quick Stats</h3>
                       <div className="space-y-4">
-                        {bookings.slice(0, 3).map((booking) => (
-                          <div key={booking.id} className="flex items-center justify-between p-4 bg-dark-700 rounded-lg">
-                            <div>
-                              <h4 className="text-white font-medium">{booking.carName}</h4>
-                              <p className="text-gray-400 text-sm">{booking.customerName}</p>
+                        <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-green-400/20 to-green-600/20 rounded-lg flex items-center justify-center">
+                              <TrendingUpIcon className="w-5 h-5 text-green-400" />
                             </div>
-                            <div className="text-right">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                                {booking.status}
-                              </span>
-                              <p className="text-white font-semibold mt-1">${booking.totalPrice}</p>
+                            <div>
+                              <p className="text-white font-medium">Monthly Revenue</p>
+                              <p className="text-gray-400 text-sm">This month</p>
                             </div>
                           </div>
-                        ))}
+                          <p className="text-2xl font-bold text-white">${analytics?.monthlyRevenue?.toLocaleString() || '0'}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-400/20 to-blue-600/20 rounded-lg flex items-center justify-center">
+                              <CalendarDaysIcon className="w-5 h-5 text-blue-400" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">Active Bookings</p>
+                              <p className="text-gray-400 text-sm">Currently active</p>
+                            </div>
+                          </div>
+                          <p className="text-2xl font-bold text-white">{analytics?.activeBookings || 0}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-400/20 to-purple-600/20 rounded-lg flex items-center justify-center">
+                              <UsersIcon className="w-5 h-5 text-purple-400" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">New Users</p>
+                              <p className="text-gray-400 text-sm">This month</p>
+                            </div>
+                          </div>
+                          <p className="text-2xl font-bold text-white">{analytics?.newUsers || 0}</p>
+                        </div>
                       </div>
+                    </AnimatedCard>
+                  </div>
+
+                  {/* Recent Activity */}
+                  <AnimatedCard delay={0.6} className="p-6">
+                    <h3 className="text-xl font-semibold text-white mb-6">Recent Activity</h3>
+                    <div className="space-y-4">
+                      {bookings.slice(0, 5).map((booking, index) => (
+                        <motion.div
+                          key={booking.id}
+                          className="flex items-center space-x-4 p-4 bg-dark-700/50 rounded-xl hover:bg-dark-700/70 transition-colors"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <div className="w-12 h-12 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-xl flex items-center justify-center">
+                            <CalendarDaysIcon className="w-6 h-6 text-neon-blue" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-white font-medium">{booking.user.name} booked {booking.car.name}</h4>
+                            <p className="text-gray-400 text-sm">
+                              {new Date(booking.dates.startDate).toLocaleDateString()} - {new Date(booking.dates.endDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                              {React.createElement(getStatusIcon(booking.status), { className: "w-3 h-3" })}
+                              <span className="capitalize">{booking.status}</span>
+                            </div>
+                            <p className="text-white font-semibold mt-1">${booking.pricing.total}</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </AnimatedCard>
+                </motion.div>
+              )}
+
+              {activeTab === 'cars' && (
+                <motion.div
+                  key="cars"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-white">Car Fleet Management</h2>
+                    <AnimatedButton
+                      variant="primary"
+                      gradient
+                      glow
+                      icon={<PlusIcon className="w-5 h-5" />}
+                    >
+                      Add New Car
+                    </AnimatedButton>
+                  </div>
+
+                  <AnimatedTable
+                    columns={[
+                      {
+                        key: 'car',
+                        label: 'Car',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-lg flex items-center justify-center">
+                              <TruckIcon className="w-6 h-6 text-neon-blue" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{row.name}</p>
+                              <p className="text-gray-400 text-sm">{row.brand} {row.model} • {row.year}</p>
+                            </div>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'category',
+                        label: 'Category',
+                        render: (_, row) => (
+                          <span className="text-gray-300 capitalize">{row.category}</span>
+                        )
+                      },
+                      {
+                        key: 'price',
+                        label: 'Price',
+                        render: (_, row) => (
+                          <p className="text-white font-semibold">${row.price}/day</p>
+                        )
+                      },
+                      {
+                        key: 'status',
+                        label: 'Status',
+                        render: (_, row) => (
+                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(row.status)}`}>
+                            {React.createElement(getStatusIcon(row.status), { className: "w-3 h-3" })}
+                            <span className="capitalize">{row.status}</span>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'rating',
+                        label: 'Rating',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-1">
+                            <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-white">{row.rating.average}</span>
+                            <span className="text-gray-400 text-sm">({row.rating.count})</span>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'location',
+                        label: 'Location',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-1">
+                            <MapPinIcon className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-300">{row.location.address.city}, {row.location.address.state}</span>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-2">
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<EyeIcon className="w-4 h-4" />}
+                            />
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<PencilIcon className="w-4 h-4" />}
+                            />
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<TrashIcon className="w-4 h-4" />}
+                            />
+                          </div>
+                        )
+                      }
+                    ]}
+                    data={cars}
+                  />
+                </motion.div>
+              )}
+
+              {activeTab === 'bookings' && (
+                <motion.div
+                  key="bookings"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-white">Booking Management</h2>
+                    <div className="flex space-x-4">
+                      <AnimatedButton
+                        variant="secondary"
+                        icon={<TrendingUpIcon className="w-5 h-5" />}
+                      >
+                        Export
+                      </AnimatedButton>
+                      <AnimatedButton
+                        variant="primary"
+                        gradient
+                        glow
+                        icon={<PlusIcon className="w-5 h-5" />}
+                      >
+                        New Booking
+                      </AnimatedButton>
                     </div>
                   </div>
 
-                  <div className="bg-dark-800 rounded-xl border border-dark-700">
-                    <div className="p-6 border-b border-dark-700">
-                      <h3 className="text-xl font-semibold text-white">Car Status</h3>
+                  <AnimatedTable
+                    columns={[
+                      {
+                        key: 'booking',
+                        label: 'Booking',
+                        render: (_, row) => (
+                          <div>
+                            <p className="text-white font-medium">#{row.id.slice(-8)}</p>
+                            <p className="text-gray-400 text-sm">{new Date(row.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'user',
+                        label: 'Customer',
+                        render: (_, row) => (
+                          <div>
+                            <p className="text-white font-medium">{row.user.name}</p>
+                            <p className="text-gray-400 text-sm">{row.user.email}</p>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'car',
+                        label: 'Car',
+                        render: (_, row) => (
+                          <div>
+                            <p className="text-white font-medium">{row.car.name}</p>
+                            <p className="text-gray-400 text-sm">{row.car.brand} {row.car.model}</p>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'dates',
+                        label: 'Dates',
+                        render: (_, row) => (
+                          <div>
+                            <p className="text-white">{new Date(row.dates.startDate).toLocaleDateString()}</p>
+                            <p className="text-gray-400 text-sm">{row.dates.totalDays} days</p>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'status',
+                        label: 'Status',
+                        render: (_, row) => (
+                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(row.status)}`}>
+                            {React.createElement(getStatusIcon(row.status), { className: "w-3 h-3" })}
+                            <span className="capitalize">{row.status}</span>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'total',
+                        label: 'Total',
+                        render: (_, row) => (
+                          <p className="text-white font-semibold">${row.pricing.total}</p>
+                        )
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-2">
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<EyeIcon className="w-4 h-4" />}
+                            />
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<PencilIcon className="w-4 h-4" />}
+                            />
+                          </div>
+                        )
+                      }
+                    ]}
+                    data={bookings}
+                  />
+                </motion.div>
+              )}
+
+              {activeTab === 'users' && (
+                <motion.div
+                  key="users"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-white">User Management</h2>
+                    <div className="flex space-x-4">
+                      <AnimatedButton
+                        variant="secondary"
+                        icon={<TrendingUpIcon className="w-5 h-5" />}
+                      >
+                        Export
+                      </AnimatedButton>
+                      <AnimatedButton
+                        variant="primary"
+                        gradient
+                        glow
+                        icon={<PlusIcon className="w-5 h-5" />}
+                      >
+                        Add User
+                      </AnimatedButton>
                     </div>
-                    <div className="p-6">
+                  </div>
+
+                  <AnimatedTable
+                    columns={[
+                      {
+                        key: 'user',
+                        label: 'User',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-full flex items-center justify-center">
+                              <UsersIcon className="w-5 h-5 text-neon-blue" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{row.name}</p>
+                              <p className="text-gray-400 text-sm">{row.email}</p>
+                            </div>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'role',
+                        label: 'Role',
+                        render: (_, row) => (
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            row.role === 'admin' ? 'bg-red-500/20 text-red-400' :
+                            row.role === 'manager' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-blue-500/20 text-blue-400'
+                          }`}>
+                            {row.role}
+                          </span>
+                        )
+                      },
+                      {
+                        key: 'status',
+                        label: 'Status',
+                        render: (_, row) => (
+                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(row.status)}`}>
+                            {React.createElement(getStatusIcon(row.status), { className: "w-3 h-3" })}
+                            <span className="capitalize">{row.status}</span>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'bookings',
+                        label: 'Bookings',
+                        render: (_, row) => (
+                          <p className="text-white font-semibold">{row.totalBookings}</p>
+                        )
+                      },
+                      {
+                        key: 'spent',
+                        label: 'Total Spent',
+                        render: (_, row) => (
+                          <p className="text-white font-semibold">${row.totalSpent.toLocaleString()}</p>
+                        )
+                      },
+                      {
+                        key: 'joined',
+                        label: 'Joined',
+                        render: (_, row) => (
+                          <p className="text-gray-300">{new Date(row.createdAt).toLocaleDateString()}</p>
+                        )
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        render: (_, row) => (
+                          <div className="flex items-center space-x-2">
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<EyeIcon className="w-4 h-4" />}
+                            />
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<PencilIcon className="w-4 h-4" />}
+                            />
+                            <AnimatedButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<TrashIcon className="w-4 h-4" />}
+                            />
+                          </div>
+                        )
+                      }
+                    ]}
+                    data={users}
+                  />
+                </motion.div>
+              )}
+
+              {activeTab === 'settings' && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <h2 className="text-2xl font-bold text-white">System Settings</h2>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <AnimatedCard delay={0.1} className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-6">General Settings</h3>
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Available</span>
-                          <span className="text-green-400 font-semibold">{analytics.availableCars}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Rented</span>
-                          <span className="text-blue-400 font-semibold">{analytics.totalCars - analytics.availableCars}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Maintenance</span>
-                          <span className="text-yellow-400 font-semibold">3</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Occupancy Rate</span>
-                          <span className="text-neon-blue font-semibold">{analytics.occupancyRate}%</span>
-                        </div>
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<Cog6ToothIcon className="w-5 h-5" />}
+                        >
+                          System Configuration
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<BellIcon className="w-5 h-5" />}
+                        >
+                          Notification Settings
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<CreditCardIcon className="w-5 h-5" />}
+                        >
+                          Payment Settings
+                        </AnimatedButton>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                    </AnimatedCard>
 
-            {/* Cars Tab */}
-            {activeTab === 'cars' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-white">Car Management</h2>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search cars..."
-                        className="pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                      />
-                    </div>
-                    <button className="bg-gradient-neon text-dark-900 px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                      <PlusIcon className="w-5 h-5 mr-2" />
-                      Add Car
-                    </button>
+                    <AnimatedCard delay={0.2} className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-6">Security</h3>
+                      <div className="space-y-4">
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<ShieldCheckIcon className="w-5 h-5" />}
+                        >
+                          Security Settings
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<UsersIcon className="w-5 h-5" />}
+                        >
+                          User Permissions
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="secondary"
+                          className="w-full justify-start"
+                          icon={<Cog6ToothIcon className="w-5 h-5" />}
+                        >
+                          API Settings
+                        </AnimatedButton>
+                      </div>
+                    </AnimatedCard>
                   </div>
-                </div>
-
-                <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-dark-700">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Car</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Location</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Revenue</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-dark-700">
-                        {cars.map((car) => (
-                          <tr key={car.id} className="hover:bg-dark-700/50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-12 h-8 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded flex items-center justify-center">
-                                  <TruckIcon className="w-6 h-6 text-gray-400" />
-                                </div>
-                                <div>
-                                  <div className="text-white font-medium">{car.name}</div>
-                                  <div className="text-gray-400 text-sm">{car.year} • {car.mileage.toLocaleString()} mi</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-neon-blue/20 text-neon-blue">
-                                {car.category}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">${car.price}</div>
-                              <div className="text-gray-400 text-sm">/day</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(car.status)}`}>
-                                {car.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">{car.location}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">${car.totalRevenue.toLocaleString()}</div>
-                              <div className="text-gray-400 text-sm">{car.totalRentals} rentals</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center space-x-2">
-                                <button className="p-1 text-gray-400 hover:text-white transition-colors">
-                                  <EyeIcon className="w-4 h-4" />
-                                </button>
-                                <button className="p-1 text-gray-400 hover:text-neon-blue transition-colors">
-                                  <PencilIcon className="w-4 h-4" />
-                                </button>
-                                <button className="p-1 text-gray-400 hover:text-red-400 transition-colors">
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Bookings Tab */}
-            {activeTab === 'bookings' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-white">Booking Management</h2>
-                  <div className="flex items-center space-x-4">
-                    <select className="px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white">
-                      <option>All Status</option>
-                      <option>Pending</option>
-                      <option>Confirmed</option>
-                      <option>Active</option>
-                      <option>Completed</option>
-                      <option>Cancelled</option>
-                    </select>
-                    <button className="bg-gradient-neon text-dark-900 px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                      <ArrowPathIcon className="w-5 h-5 mr-2" />
-                      Refresh
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-dark-700">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Booking ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Car</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Dates</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Payment</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-dark-700">
-                        {bookings.map((booking) => (
-                          <tr key={booking.id} className="hover:bg-dark-700/50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="text-white font-mono text-sm">#{booking.id}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-medium">{booking.carName}</div>
-                              <div className="text-gray-400 text-sm">{booking.totalDays} days</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-medium">{booking.customerName}</div>
-                              <div className="text-gray-400 text-sm">{booking.customerEmail}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">{booking.startDate}</div>
-                              <div className="text-gray-400 text-sm">to {booking.endDate}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                                {booking.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.paymentStatus)}`}>
-                                {booking.paymentStatus}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">${booking.totalPrice}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center space-x-2">
-                                <button className="p-1 text-gray-400 hover:text-white transition-colors">
-                                  <EyeIcon className="w-4 h-4" />
-                                </button>
-                                <button className="p-1 text-gray-400 hover:text-neon-blue transition-colors">
-                                  <PencilIcon className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Users Tab */}
-            {activeTab === 'users' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-white">User Management</h2>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search users..."
-                        className="pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                      />
-                    </div>
-                    <select className="px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white">
-                      <option>All Status</option>
-                      <option>Active</option>
-                      <option>Inactive</option>
-                      <option>Suspended</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-dark-700">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contact</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Bookings</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total Spent</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Last Login</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-dark-700">
-                        {users.map((user) => (
-                          <tr key={user.id} className="hover:bg-dark-700/50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-gradient-neon rounded-full flex items-center justify-center">
-                                  <UserGroupIcon className="w-6 h-6 text-dark-900" />
-                                </div>
-                                <div>
-                                  <div className="text-white font-medium">{user.name}</div>
-                                  <div className="text-gray-400 text-sm">Member since {new Date(user.memberSince).getFullYear()}</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">{user.email}</div>
-                              <div className="text-gray-400 text-sm">{user.phone}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                                {user.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">{user.totalBookings}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">${user.totalSpent}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-gray-400 text-sm">{user.lastLogin}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center space-x-2">
-                                <button className="p-1 text-gray-400 hover:text-white transition-colors">
-                                  <EyeIcon className="w-4 h-4" />
-                                </button>
-                                <button className="p-1 text-gray-400 hover:text-neon-blue transition-colors">
-                                  <PencilIcon className="w-4 h-4" />
-                                </button>
-                                <button className="p-1 text-gray-400 hover:text-red-400 transition-colors">
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Analytics Tab */}
-            {activeTab === 'analytics' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <h2 className="text-2xl font-bold text-white">Analytics & Reports</h2>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Revenue Overview</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Total Revenue</span>
-                        <span className="text-2xl font-bold text-neon-green">${analytics.totalRevenue.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">This Month</span>
-                        <span className="text-xl font-semibold text-white">${analytics.monthlyRevenue.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Growth Rate</span>
-                        <span className="text-green-400 font-semibold flex items-center">
-                          <ArrowUpIcon className="w-4 h-4 mr-1" />
-                          +12.5%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Booking Statistics</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Total Bookings</span>
-                        <span className="text-2xl font-bold text-neon-blue">{analytics.totalBookings}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Active Bookings</span>
-                        <span className="text-xl font-semibold text-white">{analytics.activeBookings}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Average Rating</span>
-                        <span className="text-yellow-400 font-semibold flex items-center">
-                          <StarIcon className="w-4 h-4 mr-1" />
-                          {analytics.averageRating}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Fleet Management</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Total Cars</span>
-                        <span className="text-2xl font-bold text-neon-purple">{analytics.totalCars}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Available</span>
-                        <span className="text-xl font-semibold text-green-400">{analytics.availableCars}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Occupancy Rate</span>
-                        <span className="text-xl font-semibold text-neon-blue">{analytics.occupancyRate}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">User Growth</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Total Users</span>
-                        <span className="text-2xl font-bold text-neon-pink">{analytics.totalUsers}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">New This Month</span>
-                        <span className="text-xl font-semibold text-green-400">+{analytics.newUsers}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Growth Rate</span>
-                        <span className="text-green-400 font-semibold flex items-center">
-                          <ArrowUpIcon className="w-4 h-4 mr-1" />
-                          +8.2%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
-                    <button className="bg-gradient-neon text-dark-900 px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                      <DocumentTextIcon className="w-5 h-5 mr-2" />
-                      Generate Report
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button className="p-4 bg-dark-700 rounded-lg text-left hover:bg-dark-600 transition-colors">
-                      <div className="text-white font-medium">Monthly Revenue Report</div>
-                      <div className="text-gray-400 text-sm">Generate detailed revenue analysis</div>
-                    </button>
-                    <button className="p-4 bg-dark-700 rounded-lg text-left hover:bg-dark-600 transition-colors">
-                      <div className="text-white font-medium">Customer Analytics</div>
-                      <div className="text-gray-400 text-sm">View customer behavior insights</div>
-                    </button>
-                    <button className="p-4 bg-dark-700 rounded-lg text-left hover:bg-dark-600 transition-colors">
-                      <div className="text-white font-medium">Fleet Performance</div>
-                      <div className="text-gray-400 text-sm">Analyze car utilization rates</div>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Settings Tab */}
-            {activeTab === 'settings' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <h2 className="text-2xl font-bold text-white">System Settings</h2>
-
-                <div className="space-y-6">
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">General Settings</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
-                        <input
-                          type="text"
-                          defaultValue="Monstrac CarRent"
-                          className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Default Currency</label>
-                        <select className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:border-neon-blue focus:ring-1 focus:ring-neon-blue">
-                          <option>USD ($)</option>
-                          <option>EUR (€)</option>
-                          <option>GBP (£)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Time Zone</label>
-                        <select className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:border-neon-blue focus:ring-1 focus:ring-neon-blue">
-                          <option>UTC-5 (EST)</option>
-                          <option>UTC-8 (PST)</option>
-                          <option>UTC+0 (GMT)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Booking Settings</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Minimum Booking Duration (hours)</label>
-                        <input
-                          type="number"
-                          defaultValue="2"
-                          className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Maximum Booking Duration (days)</label>
-                        <input
-                          type="number"
-                          defaultValue="30"
-                          className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Advance Booking Limit (days)</label>
-                        <input
-                          type="number"
-                          defaultValue="90"
-                          className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Payment Settings</h3>
-                    <div className="space-y-4">
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-300">Enable Stripe Payments</span>
-                        <input type="checkbox" className="w-4 h-4 text-neon-blue bg-dark-700 border-dark-600 rounded focus:ring-neon-blue" defaultChecked />
-                      </label>
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-300">Enable PayPal</span>
-                        <input type="checkbox" className="w-4 h-4 text-neon-blue bg-dark-700 border-dark-600 rounded focus:ring-neon-blue" />
-                      </label>
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-300">Enable Apple Pay</span>
-                        <input type="checkbox" className="w-4 h-4 text-neon-blue bg-dark-700 border-dark-600 rounded focus:ring-neon-blue" />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button className="bg-gradient-neon text-dark-900 px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-                      Save Settings
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

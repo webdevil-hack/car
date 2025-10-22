@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import CustomerDashboard from './pages/CustomerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import DashboardDemo from './pages/DashboardDemo';
 
 // Components
 import ScrollToTop from './components/ScrollToTop';
@@ -35,6 +36,7 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/dashboard" element={<CustomerDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/demo" element={<DashboardDemo />} />
             </Routes>
           </div>
         </Router>
