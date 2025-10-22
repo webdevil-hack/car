@@ -265,11 +265,11 @@ const CarsPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <SearchBar onSearch={handleSearch} />
+              <SearchBar value={filters.search} onChange={(value) => setFilters(prev => ({ ...prev, search: value }))} />
             </div>
             <div className="flex gap-4">
               <SortDropdown value={sortBy} onChange={handleSortChange} />
-              <ViewToggle value={viewMode} onChange={handleViewModeChange} />
+              <ViewToggle mode={viewMode} onChange={setViewMode} />
             </div>
           </div>
         </div>
@@ -279,7 +279,7 @@ const CarsPage: React.FC = () => {
           <div className="lg:w-80">
             <FilterPanel
               filters={filters}
-              onFilterChange={handleFilterChange}
+              onChange={handleFilterChange}
             />
           </div>
 

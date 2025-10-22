@@ -13,8 +13,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   SparklesIcon,
@@ -167,7 +167,6 @@ const AdminDashboard: React.FC = () => {
       active: 'text-green-400 bg-green-400/10 border-green-400/20',
       completed: 'text-gray-400 bg-gray-400/10 border-gray-400/20',
       cancelled: 'text-red-400 bg-red-400/10 border-red-400/20',
-      active: 'text-green-400 bg-green-400/10 border-green-400/20',
       inactive: 'text-gray-400 bg-gray-400/10 border-gray-400/20',
       suspended: 'text-red-400 bg-red-400/10 border-red-400/20'
     };
@@ -185,7 +184,6 @@ const AdminDashboard: React.FC = () => {
       active: SparklesIcon,
       completed: CheckCircleIcon,
       cancelled: XCircleIcon,
-      active: CheckCircleIcon,
       inactive: XCircleIcon,
       suspended: XCircleIcon
     };
@@ -329,7 +327,7 @@ const AdminDashboard: React.FC = () => {
                       title="Total Revenue"
                       value={`$${analytics?.totalRevenue?.toLocaleString() || '0'}`}
                       change={{ value: analytics?.revenueGrowth || 0, type: analytics?.revenueGrowth && analytics.revenueGrowth > 0 ? 'increase' : 'decrease' }}
-                      icon={<TrendingUpIcon className="w-6 h-6" />}
+                      icon={<ArrowTrendingUpIcon className="w-6 h-6" />}
                       color="green"
                       delay={0}
                     />
@@ -378,7 +376,7 @@ const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl">
                           <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-br from-green-400/20 to-green-600/20 rounded-lg flex items-center justify-center">
-                              <TrendingUpIcon className="w-5 h-5 text-green-400" />
+                              <ArrowTrendingUpIcon className="w-5 h-5 text-green-400" />
                             </div>
                             <div>
                               <p className="text-white font-medium">Monthly Revenue</p>
@@ -578,7 +576,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex space-x-4">
                       <AnimatedButton
                         variant="secondary"
-                        icon={<TrendingUpIcon className="w-5 h-5" />}
+                        icon={<ArrowTrendingUpIcon className="w-5 h-5" />}
                       >
                         Export
                       </AnimatedButton>
@@ -690,7 +688,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex space-x-4">
                       <AnimatedButton
                         variant="secondary"
-                        icon={<TrendingUpIcon className="w-5 h-5" />}
+                        icon={<ArrowTrendingUpIcon className="w-5 h-5" />}
                       >
                         Export
                       </AnimatedButton>

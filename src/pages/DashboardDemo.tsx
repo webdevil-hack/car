@@ -6,7 +6,7 @@ import AnimatedButton from '../components/dashboard/AnimatedButton';
 import AnimatedTable from '../components/dashboard/AnimatedTable';
 import ProgressRing from '../components/dashboard/ProgressRing';
 import AnimatedChart from '../components/dashboard/AnimatedChart';
-import NotificationContainer from '../components/dashboard/NotificationToast';
+import { NotificationContainer } from '../components/dashboard/NotificationToast';
 import { CardSkeleton, TableSkeleton } from '../components/dashboard/LoadingSkeleton';
 import { 
   ChartBarIcon, 
@@ -14,7 +14,7 @@ import {
   CalendarDaysIcon, 
   UsersIcon,
   StarIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   SparklesIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
@@ -109,7 +109,7 @@ const DashboardDemo: React.FC = () => {
               title="Total Revenue"
               value="$125,430"
               change={{ value: 12, type: 'increase' }}
-              icon={<TrendingUpIcon className="w-6 h-6" />}
+              icon={<ArrowTrendingUpIcon className="w-6 h-6" />}
               color="green"
               delay={0}
             />

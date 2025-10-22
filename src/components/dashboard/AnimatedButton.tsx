@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface AnimatedButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -107,7 +107,7 @@ const AnimatedButton: React.FC<AnimatedButtonProps> = ({
                 {icon}
               </motion.div>
             )}
-            <span>{children}</span>
+            {children && <span>{children}</span>}
           </>
         )}
       </div>
